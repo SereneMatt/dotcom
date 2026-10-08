@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Serene. Hear my name and find me on X and GitHub.">
+<meta name="theme-color" content="#f5f3ee">
+<link rel="icon" href="data:,">
+<title>Serene</title>
+<style>
+  :root { color-scheme: light; font-family: system-ui, sans-serif; color: #292c28; background: #f5f3ee; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100svh; display: grid; grid-template-rows: 1fr auto; }
+  main { display: grid; place-content: center; padding: 3rem 1.5rem; }
+  h1 { margin: 0 0 1rem; font-size: clamp(4rem, 14vw, 8rem); font-weight: 450; letter-spacing: -.065em; line-height: 1.1; }
+  .pronunciation { display: flex; align-items: center; justify-content: center; gap: .75rem; }
+  .phonetic { font-size: 1.25rem; color: #596052; }
+  button { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: .6rem; border: 1px solid #c3c8b9; border-radius: 50%; color: #394b32; background: transparent; cursor: pointer; }
+  button:hover { background: #e7eadf; }
+  button:disabled { cursor: wait; }
+  button[hidden] { display: none; }
+  button svg { width: 1.1rem; height: 1.1rem; }
+  :focus-visible { outline: 2px solid #394b32; outline-offset: 5px; }
+  .status { min-height: 1.5em; max-width: 25rem; margin: .75rem 0 0; text-align: center; font-size: .875rem; color: #596052; }
+  footer { padding: 2rem 1.5rem; }
+  nav { display: flex; justify-content: center; gap: 2rem; }
+  a { color: inherit; text-underline-offset: .3em; text-decoration-thickness: 1px; }
+  nav a { padding: .75rem .25rem; font-size: .875rem; }
+</style>
+<main>
+  <h2>Serene</h2>
+  <div class="pronunciation">
+    <span class="phonetic">/səˈriːn/</span>
+    <button hidden type="button" aria-label="Hear Serene pronounced">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4 5 9H2v6h3l6 5V4Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+    </button>
+  </div>
+  <p class="status" role="status" aria-live="polite"></p>
+  <noscript><p><a href="/audio/serene-pronunciation.mp3">Hear my name</a></p></noscript>
+</main>
+<footer><nav aria-label="Social links"><a href="https://x.com/serene_matt">X</a><a href="https://github.com/serenematt">GitHub</a></nav></footer>
+<script>
+  const button = document.querySelector('button');
+  const status = document.querySelector('.status');
+  let audio;
+  button.hidden = false;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    status.textContent = 'Loading pronunciation…';
+    try {
+      if (!audio) {
+        audio = new Audio('/audio/serene-pronunciation.mp3');
+        audio.addEventListener('ended', () => {
+          button.disabled = false;
+          status.textContent = '';
+        });
+        audio.addEventListener('error', failed);
+      }
+      audio.currentTime = 0;
+      await audio.play();
+      status.textContent = 'Playing pronunciation';
+    } catch { failed(); }
+  });
+  function failed() {
+    audio = undefined;
+    button.disabled = false;
+    status.textContent = 'Could not play. Please try again.';
+  }
+</script>
+</html>

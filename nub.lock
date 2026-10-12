@@ -20,9 +20,6 @@ importers:
       lighthouse:
         specifier: 13.5.0
         version: 13.5.0(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))
-      playwright:
-        specifier: 1.64.0
-        version: 1.64.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -964,36 +961,6 @@ packages:
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
-
-  playwright-core@1.64.0:
-    resolution: {integrity: sha512-T9r+MZkTECl2+oUcZ26YgZzTrYidTsIhYYkJix+6iDOymOb1FB2RLLSOxRGnZGv5DStt+aduIVbt+E8WygXYpg==}
-    engines: {node: '>=20'}
-    hasBin: true
-    peerDependencies:
-      bufferutil: '*'
-      chromium-bidi: '*'
-      electron: '*'
-      kerberos: '*'
-      utf-8-validate: '*'
-      zod: '*'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      chromium-bidi:
-        optional: true
-      electron:
-        optional: true
-      kerberos:
-        optional: true
-      utf-8-validate:
-        optional: true
-      zod:
-        optional: true
-
-  playwright@1.64.0:
-    resolution: {integrity: sha512-kVzTnYFYEyQ9RGzBjNCd2+yEqWmVbxl3AHPynv3qQ6JTjv4a+kwRcnqQwIpuP3NnrnIrE/Q6wWAIAvMfIE2/Yg==}
-    engines: {node: '>=20'}
-    hasBin: true
 
   puppeteer-core@25.12.0:
     resolution: {integrity: sha512-z6LQUt5SH7jwGtGA+nMtJuEjZIsqPiwQ+EFHCYuVDQrJpvifNmmGuyDvTzAKPyFzihxgHc5f3aMzu2kn8Ps37A==}
@@ -1982,19 +1949,6 @@ snapshots:
   path-to-regexp@6.3.0: {}
 
   pathe@2.0.3: {}
-
-  playwright-core@1.64.0: {}
-
-  playwright@1.64.0:
-    dependencies:
-      playwright-core: 1.64.0
-    transitivePeerDependencies:
-      - bufferutil
-      - chromium-bidi
-      - electron
-      - kerberos
-      - utf-8-validate
-      - zod
 
   puppeteer-core@25.12.0:
     dependencies:

@@ -1,8 +1,12 @@
 node_modules/
 test-results/
 performance-results/
-.wrangler/
+.cloudflare/
 .deploy/
 .env
 .env.*
 .agents/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example

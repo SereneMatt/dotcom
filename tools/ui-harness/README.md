@@ -19,7 +19,8 @@ nub run https:setup
 
 Complete Portless's administrator prompt in your terminal. This trusts its local
 certificate authority and starts the loopback proxy on port 443. Portless requires
-Node.js 24 or newer. Then start the development server:
+Node.js 24 or newer. If its password prompt times out, run `sudo -v` in that terminal
+before retrying `nub run https:setup`. Then start the development server:
 
 ```sh
 nub run preview

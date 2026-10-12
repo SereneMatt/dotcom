@@ -1,12 +1,13 @@
-const { spawnSync } = require('node:child_process');
-const { mkdtempSync, readFileSync, rmSync } = require('node:fs');
-const { tmpdir } = require('node:os');
-const { join } = require('node:path');
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const url = process.argv[2] || 'https://www.serenematt.com/';
 const outDir = mkdtempSync(join(tmpdir(), 'serenematt-lighthouse-'));
 const outPath = join(outDir, 'report.json');
-const lighthouseCli = require.resolve('lighthouse/cli');
+const lighthouseCli = fileURLToPath(import.meta.resolve('lighthouse/cli/index.js'));
 
 const result = spawnSync(
   process.execPath,

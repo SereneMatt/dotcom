@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node bin/ui-harness.js",
     "test": "node --test test/*.test.js",
+    "test:package": "node --test test/packed-cli.test.js",
     "catalog:update": "node scripts/update-catalog.js"
   },
   "devDependencies": { "playwright": "1.64.0" }

@@ -12,24 +12,17 @@ let target;
 let targetUrl;
 
 before(async () => {
-  target = createServer(async (request, response) => {
+  target = createServer((request, response) => {
     const path = new URL(request.url, 'http://localhost').pathname;
     if (path === '/blocked') {
       response.writeHead(200, { 'Content-Security-Policy': "frame-ancestors 'none'", 'Content-Type': 'text/html' });
       return response.end('<h1>Direct access only</h1>');
     }
-    if (path === '/fixture' || path === '/second') {
+    if (path === '/' || path === '/fixture' || path === '/second') {
       response.writeHead(200, { 'Content-Type': 'text/html' });
-      return response.end(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{height:3000px}</style><h1>${path === '/fixture' ? 'First page' : 'Second page'}</h1><label>Draft<input></label><a href="/second">Next page</a>`);
+      return response.end(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{height:3000px}</style><h1>${path === '/second' ? 'Second page' : 'First page'}</h1><p>Use this page to compare layouts and try independent interactions in each preview.</p><label>Draft<input></label><a href="/second">Next page</a>`);
     }
-    try {
-      const file = path === '/' ? 'index.html' : path.slice(1);
-      if (file.includes('..')) throw new Error('Invalid path');
-      const body = await readFile(new URL(`../../../public/${file}`, import.meta.url));
-      const type = file.endsWith('.html') ? 'text/html' : file.endsWith('.mp3') ? 'audio/mpeg' : file.endsWith('.css') ? 'text/css' : 'application/octet-stream';
-      response.writeHead(200, { 'Content-Type': type });
-      response.end(body);
-    } catch { response.writeHead(404).end(); }
+    response.writeHead(404).end();
   });
   await new Promise(resolve => target.listen(0, '127.0.0.1', resolve));
   targetUrl = `http://127.0.0.1:${target.address().port}`;
@@ -60,26 +53,27 @@ async function workspace(t, path = '/') {
   return { page, harness, configPath };
 }
 
-test('dotcom renders at exact dimensions and scaling preserves page state', async t => {
+test('target renders at exact dimensions and scaling preserves input and scroll state', async t => {
   const { page } = await workspace(t);
   const dimensions = [[390, 664], [768, 1024], [1280, 720], [1440, 900]];
+  const frames = [];
   for (let index = 0; index < dimensions.length; index++) {
     const frame = await page.locator('iframe').nth(index).elementHandle().then(handle => handle.contentFrame());
-    await frame.getByRole('heading', { name: 'Serene', exact: true }).waitFor();
+    assert.equal(await frame.getByRole('heading', { level: 1 }).textContent(), 'First page');
     assert.deepEqual(await frame.evaluate(() => [innerWidth, innerHeight]), dimensions[index]);
     assert.equal(await frame.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-    await frame.evaluate(() => { window.harnessState = 'retained'; });
+    await frame.getByLabel('Draft').fill(`Draft for preview ${index}`);
+    await frame.evaluate(() => scrollTo(0, 600));
+    frames.push(frame);
   }
-  const first = page.frameLocator('iframe').first();
-  await first.getByRole('button', { name: 'Hear Serene pronounced' }).click();
-  await first.getByRole('status').filter({ hasText: 'Playing pronunciation' }).waitFor();
-  await page.getByLabel('Display scale').selectOption('1');
-  for (let index = 0; index < dimensions.length; index++) {
-    const frame = await page.locator('iframe').nth(index).elementHandle().then(handle => handle.contentFrame());
-    assert.deepEqual(await frame.evaluate(() => [innerWidth, innerHeight, window.harnessState]), [...dimensions[index], 'retained']);
+  for (const scale of ['1', 'fit']) {
+    await page.getByLabel('Display scale').selectOption(scale);
+    for (let index = 0; index < frames.length; index++) {
+      assert.deepEqual(await frames[index].evaluate(() => [innerWidth, innerHeight, scrollY]), [...dimensions[index], 600]);
+      assert.equal(await frames[index].getByLabel('Draft').inputValue(), `Draft for preview ${index}`);
+    }
   }
-  await page.getByLabel('Display scale').selectOption('fit');
-  await page.screenshot({ path: new URL('../../../test-results/ui-harness.png', import.meta.url).pathname, fullPage: true });
+  await page.screenshot({ path: new URL('../test-results/ui-harness.png', import.meta.url).pathname, fullPage: true });
 });
 
 test('native interaction stays independent while sizes change and reset returns all routes', async t => {
@@ -89,6 +83,7 @@ test('native interaction stays independent while sizes change and reset returns 
   const frame = await page.locator('iframe').first().elementHandle().then(handle => handle.contentFrame());
   await frame.evaluate(() => scrollTo(0, 600));
   const second = await page.locator('iframe').nth(1).elementHandle().then(handle => handle.contentFrame());
+  assert.equal(await second.getByLabel('Draft').inputValue(), '');
   assert.equal(await second.evaluate(() => scrollY), 0);
   await page.getByRole('spinbutton', { name: 'Width', exact: true }).fill('500');
   await page.getByRole('spinbutton', { name: 'Height', exact: true }).fill('700');
@@ -98,6 +93,8 @@ test('native interaction stays independent while sizes change and reset returns 
   assert.equal(await frame.evaluate(() => scrollY), 600);
   await page.getByRole('button', { name: 'Remove 500 × 700', exact: true }).click();
   assert.equal(await page.locator('iframe').count(), 4);
+  assert.equal(await first.getByLabel('Draft').inputValue(), 'Keep this text');
+  assert.equal(await frame.evaluate(() => scrollY), 600);
   await first.getByRole('link', { name: 'Next page' }).click();
   await first.getByRole('heading', { name: 'Second page' }).waitFor();
   await page.frameLocator('iframe').nth(1).getByRole('heading', { name: 'First page' }).waitFor();

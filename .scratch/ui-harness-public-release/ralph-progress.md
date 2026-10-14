@@ -1,0 +1,25 @@
+## 2026-10-15: task 1 blocked before implementation
+
+- Selected execution task 1, "Make package verification independent of dotcom", after reading the specification and this initially empty log. Its status is `ready-for-agent` and it has no dependencies. No task completed.
+- Found two external fixture dependencies in `tools/ui-harness/test/browser.test.js`: reads from `../../../public/` and a screenshot written to `../../../test-results/ui-harness.png`. The package already declares its own Playwright development dependency. Existing inline fixtures cover navigation, input, scrolling, and blocked embedding.
+- Drafted a regression check using a generic heading and real input/scroll state across scale changes. Could not reach the expected assertion failure because the fixture server cannot listen. Reverted the draft instead of implementing without the required failing-before evidence. Stopped the two stalled browser test processes.
+- Verification: `/home/serenematt/.local/share/mise/installs/node/26.8.2/bin/node --test --test-isolation=none --test-reporter=tap tools/ui-harness/test/server.test.js` failed all three tests with `listen EPERM: operation not permitted 127.0.0.1`. A standalone `node:http` listener reproduced the same denial. Used the installed Node binary directly to distinguish this failure from nub's separate runtime-cache warnings.
+- Required feedback loop: `nub run test` exited 1 with `Cannot find module 'playwright'` from `tests/homepage.test.cjs`. Nub also reported no usable runtime cache. No checks passed and no commit was attempted.
+- Environment: Linux, Node 26.8.2, npm 11.19.1, nub 0.9.3, installed Chromium 152.0.7977.82. Browser behavior was not verified.
+- Files retained from this iteration: `.scratch/ui-harness-public-release/spec.md` and `.scratch/ui-harness-public-release/ralph-progress.md` only. Pre-existing untracked files were left alone.
+- Next step: resume task 1 with loopback binding permitted and the root suite's Playwright dependency available. Replace external fixtures and screenshot output, establish red/green evidence, run the package suite from an isolated copy with its own dependency installation, and pass `nub run test` before committing. Tasks 2–4 were not started.
+
+## 2026-10-15: task 1 complete
+
+- Completed execution task 1, "Make package verification independent of dotcom". Its status was `ready-for-agent`; it had no dependencies. Tasks 2–4 were not started.
+- Reused the package's inline target pages for `/`, `/fixture`, and `/second`. Removed the fallback that read dotcom's `public/` directory. The fixture retains readable text, an input, navigation, scrollable height, and the embedding-blocked response.
+- Replaced the homepage heading, audio, and synthetic window-state assertions with real input and scroll assertions. All four starting viewport dimensions remain exact at fit and actual-size scale. Distinct input values and scroll positions survive both scale transitions. Adding and removing another preview preserves the first preview's state, and the second preview starts untouched.
+- Moved the screenshot to `tools/ui-harness/test-results/ui-harness.png`. No runtime code, dependency declarations, or lockfiles changed.
+- TDD red: `CHROME_PATH=/usr/bin/chromium node --test --test-name-pattern='target renders' tools/ui-harness/test/browser.test.js` failed with the expected heading assertion: actual `Serene`, expected `First page`.
+- TDD green: `CHROME_PATH=/usr/bin/chromium npm test --prefix tools/ui-harness` passed all 7 tests after the fixture replacement.
+- Isolated verification: copied only `tools/ui-harness` into `/tmp/ui-harness-isolated-fqfgox_3/ui-harness`, excluding `node_modules` and `test-results`, with Python `shutil.copytree`. Removed `NODE_PATH` and `NODE_OPTIONS` from the child environment. Ran `npm ci --no-audit --no-fund`, then `CHROME_PATH=/usr/bin/chromium npm test` inside that copy. All 7 tests passed. `import.meta.resolve('playwright')` resolved to the copy's own `node_modules/playwright/index.mjs`. The copy contained no dotcom assets or ancestor dependency installation. Assertions confirmed the screenshot existed inside the copied package and no sibling `test-results` directory existed. The temporary copy was removed on exit.
+- Required repository gate: `CHROME_PATH=/usr/bin/chromium nub run test` passed all 4 tests. `git diff --check` passed.
+- Environment: Arch Linux, Node 26.8.2, npm 11.19.1, nub 0.9.3, Playwright 1.64.0, Chromium 152.0.7977.82 at `/usr/bin/chromium`. No other browser or operating system was checked.
+- Files changed: `tools/ui-harness/test/browser.test.js`, `.scratch/ui-harness-public-release/spec.md`, and `.scratch/ui-harness-public-release/ralph-progress.md`. Unrelated untracked files remain untouched.
+- Blockers: none for this task. The previous loopback and missing-Playwright failures no longer reproduce in this environment.
+- Next step: task 2, verify the packed CLI from a clean target-project directory, including configuration location, restart behavior, and available runner paths. Broader release acceptance remains incomplete.

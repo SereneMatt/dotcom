@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "url": "https://dotcom.localhost/",
+  "viewports": [
+    {
+      "width": 390,
+      "height": 664
+    },
+    {
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "width": 1440,
+      "height": 900
+    }
+  ],
+  "scale": "fit"
+}

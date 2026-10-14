@@ -2,10 +2,16 @@
   "name": "serenematt.com",
   "private": true,
   "scripts": {
-    "preview": "python3 -m http.server 4173 --bind 127.0.0.1 --directory public",
+    "https:setup": "portless proxy start --port 443",
+    "harness": "portless harness.dotcom node tools/ui-harness/bin/ui-harness.js",
+    "harness:http": "node tools/ui-harness/bin/ui-harness.js http://127.0.0.1:4173",
+    "test:harness": "node --test tools/ui-harness/test/*.test.js",
+    "test:https": "node tools/ui-harness/scripts/verify-https.js",
+    "preview": "portless dotcom sh -c 'exec python3 -m http.server \"$PORT\" --bind 127.0.0.1 --directory public'",
+    "preview:http": "python3 -m http.server 4173 --bind 127.0.0.1 --directory public",
     "test": "node --test tests/*.test.cjs",
     "test:browser": "node --test tests/homepage.test.cjs",
-    "performance": "node scripts/measure.cjs",
+    "performance": "node scripts/measure.mjs",
     "deploy": "cf deploy"
   },
   "devDependencies": {
@@ -13,6 +19,7 @@
     "@types/node": "26.6.4",
     "cf": "1.0.0-beta.13",
     "lighthouse": "13.5.0",
+    "portless": "0.15.7",
     "typescript": "7.0.2",
     "wrangler": "^4.148.0"
   },

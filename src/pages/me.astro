@@ -1,0 +1,29 @@
+---
+import Site from "../layouts/Site.astro";
+import { resume } from "../content/resume.js";
+
+const heading = "Resume";
+const links = (resume.links ?? []).filter((link) => link.href?.trim() && link.label?.trim());
+const sections = (resume.sections ?? []).filter((section) => section.heading?.trim() && section.content?.trim());
+---
+<Site title={heading} description={resume.description}>
+  <link slot="head" rel="canonical" href="https://www.serenematt.com/me">
+  <style slot="head" is:inline>
+    .identity { text-align: center; grid-template-columns: minmax(0, 1fr); }
+  </style>
+  <main class="identity">
+    <h1>{heading}</h1>
+    {resume.name && <p>{resume.name}</p>}
+    {resume.phonetic && <p class="phonetic">{resume.phonetic}</p>}
+    {resume.description && <p>{resume.description}</p>}
+    {sections.map((section) => (
+      <section>
+        <h2>{section.heading}</h2>
+        <p>{section.content}</p>
+      </section>
+    ))}
+  </main>
+  {links.length > 0 && (
+    <footer><nav aria-label="Social links">{links.map((link) => <a href={link.href}>{link.label}</a>)}</nav></footer>
+  )}
+</Site>

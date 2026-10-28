@@ -96,3 +96,74 @@ test('visitors can read the homepage and follow social links without JavaScript'
   assert.equal(await page.getByRole('link', { name: 'GitHub', exact: true }).getAttribute('href'), 'https://github.com/serenematt');
   await context.close();
 });
+
+async function assertResume(page) {
+  assert.equal(await page.locator('h1').textContent(), 'Resume');
+  assert.ok(await page.getByText('Serene', { exact: true }).isVisible());
+  assert.ok(await page.getByText('/səˈriːn/', { exact: true }).isVisible());
+  assert.ok(await page.getByText('Serene. Find me on X and GitHub.', { exact: true }).isVisible());
+  assert.equal(await page.getByRole('link', { name: 'X', exact: true }).getAttribute('href'), 'https://x.com/serene_matt');
+  assert.equal(await page.getByRole('link', { name: 'GitHub', exact: true }).getAttribute('href'), 'https://github.com/serenematt');
+  assert.equal(await page.getByRole('link', { name: 'Resume', exact: true }).getAttribute('aria-current'), 'page');
+  const hrefs = await page.locator('a').evaluateAll((els) => els.map((el) => el.getAttribute('href') || ''));
+  assert.equal(hrefs.some((href) => href.includes('/learnings') || href.includes('/hot-takes')), false);
+}
+
+test('direct entry and refresh keep the resume document', async () => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const response = await page.goto(new URL('/me', url).href);
+  assert.equal(response.status(), 200);
+  assert.equal(new URL(page.url()).pathname.replace(/\/$/, ''), '/me');
+  const html = await response.text();
+  assert.match(html, /<h1>Resume<\/h1>/);
+  assert.match(html, /Serene\. Find me on X and GitHub\./);
+  assert.doesNotMatch(html, /\/learnings|\/hot-takes/);
+  await assertResume(page);
+  await page.reload();
+  await assertResume(page);
+  await context.close();
+});
+
+test('keyboard and links move between the homepage and resume', async () => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(url);
+  const homeHref = await page.locator('a').evaluateAll((els) => els.map((el) => el.getAttribute('href') || ''));
+  assert.equal(homeHref.some((href) => href.includes('/learnings') || href.includes('/hot-takes')), false);
+  assert.equal(await page.getByRole('link', { name: 'Home', exact: true }).getAttribute('aria-current'), 'page');
+  const resumeLink = page.getByRole('link', { name: 'Resume', exact: true });
+  assert.equal(await resumeLink.getAttribute('href'), '/me');
+  await resumeLink.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForURL((next) => new URL(next).pathname.replace(/\/$/, '') === '/me');
+  await assertResume(page);
+  await page.getByRole('link', { name: 'Home', exact: true }).click();
+  await page.getByRole('heading', { name: 'Serene', exact: true }).waitFor();
+  assert.equal(await page.locator('h1').textContent(), 'Serene');
+  assert.equal(await page.getByRole('link', { name: 'X', exact: true }).count(), 1);
+  assert.equal(await page.getByRole('link', { name: 'GitHub', exact: true }).count(), 1);
+  await context.close();
+});
+
+test('resume heading and verified content are visible without JavaScript', async () => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  const response = await page.goto(new URL('/me', url).href);
+  assert.equal(response.status(), 200);
+  await assertResume(page);
+  await page.getByRole('link', { name: 'Home', exact: true }).click();
+  assert.equal(await page.locator('h1').textContent(), 'Serene');
+  await context.close();
+});
+
+test('resume layouts fit mobile and desktop viewports', async () => {
+  for (const width of [320, 390, 1440]) {
+    const context = await browser.newContext({ viewport: { width, height: 900 } });
+    const page = await context.newPage();
+    await page.goto(new URL('/me', url).href);
+    await assertResume(page);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await context.close();
+  }
+});

@@ -1,0 +1,53 @@
+---
+import Site from "../layouts/Site.astro";
+---
+<Site title="Serene" description="Serene. Find me on X and GitHub.">
+  <meta slot="head" property="og:type" content="website">
+  <meta slot="head" property="og:url" content="https://www.serenematt.com/">
+  <meta slot="head" property="og:title" content="Serene">
+  <meta slot="head" property="og:description" content="Serene. Find me on X and GitHub.">
+  <meta slot="head" name="twitter:card" content="summary">
+  <meta slot="head" name="twitter:title" content="Serene">
+  <meta slot="head" name="twitter:description" content="Serene. Find me on X and GitHub.">
+  <link slot="head" rel="canonical" href="https://www.serenematt.com/">
+  <main>
+    <h1>Serene</h1>
+    <div class="pronunciation">
+      <span class="phonetic">/səˈriːn/</span>
+      <button hidden type="button" aria-label="Hear Serene pronounced">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4 5 9H2v6h3l6 5V4Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+      </button>
+    </div>
+    <p class="status" role="status" aria-live="polite"></p>
+    <noscript><p><a href="/audio/pronunciation.mp3">Hear my name</a></p></noscript>
+  </main>
+  <footer><nav aria-label="Social links"><a href="https://x.com/serene_matt">X</a><a href="https://github.com/serenematt">GitHub</a></nav></footer>
+  <script is:inline>
+    const button = document.querySelector('button');
+    const status = document.querySelector('.status');
+    let audio;
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      status.textContent = 'Loading pronunciation…';
+      try {
+        if (!audio) {
+          audio = new Audio('/audio/pronunciation.mp3');
+          audio.addEventListener('ended', () => {
+            button.disabled = false;
+            status.textContent = '';
+          });
+          audio.addEventListener('error', failed);
+        }
+        audio.currentTime = 0;
+        await audio.play();
+        status.textContent = 'Playing pronunciation';
+      } catch { failed(); }
+    });
+    function failed() {
+      audio = undefined;
+      button.disabled = false;
+      status.textContent = 'Could not play. Please try again.';
+    }
+  </script>
+</Site>

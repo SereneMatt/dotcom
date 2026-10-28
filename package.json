@@ -5,15 +5,16 @@
     "https:setup": "portless proxy start --port 443",
     "harness": "portless harness.dotcom node tools/ui-harness/bin/ui-harness.js",
     "harness:http": "node tools/ui-harness/bin/ui-harness.js http://127.0.0.1:4173",
-    "test:harness": "node --test tools/ui-harness/test/*.test.js",
+    "test:harness": "astro build && node --test tools/ui-harness/test/*.test.js",
     "test:https": "node tools/ui-harness/scripts/verify-https.js",
     "build": "astro build",
+    "build:cloudflare": "astro build && wrangler build --experimental-new-config --experimental-cf-build-output",
     "preview": "astro build && portless dotcom sh -c 'exec python3 -m http.server \"$PORT\" --bind 127.0.0.1 --directory dist'",
     "preview:http": "astro build && python3 -m http.server 4173 --bind 127.0.0.1 --directory dist",
     "test": "astro build && node --test tests/*.test.cjs",
     "test:browser": "astro build && node --test tests/homepage.test.cjs",
     "performance": "node scripts/measure.mjs",
-    "deploy": "astro build && cf deploy"
+    "deploy": "nub run build:cloudflare && cf deploy --prebuilt"
   },
   "devDependencies": {
     "@cloudflare/build-output-utils": "0.8.6",

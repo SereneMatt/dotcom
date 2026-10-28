@@ -25,7 +25,7 @@ before(async () => {
     try {
       const file = path === '/' ? 'index.html' : path.slice(1);
       if (file.includes('..')) throw new Error('Invalid path');
-      const body = await readFile(new URL(`../../../public/${file}`, import.meta.url));
+      const body = await readFile(new URL(`../../../dist/${file}`, import.meta.url));
       const type = file.endsWith('.html') ? 'text/html' : file.endsWith('.mp3') ? 'audio/mpeg' : file.endsWith('.css') ? 'text/css' : 'application/octet-stream';
       response.writeHead(200, { 'Content-Type': type });
       response.end(body);

@@ -2,7 +2,7 @@
 
 ## v0
 
-Pure HTML page with inline CSS and minimal inline JavaScript for progressive enhancement. No framework or build step is used for the site itself.
+Pure HTML page with inline CSS and minimal inline JavaScript for progressive enhancement. Astro generates the page at build time.
 
 ### Web vitals
 

@@ -9,7 +9,7 @@ const url = process.env.TEST_URL || 'http://127.0.0.1:4174';
 
 before(async () => {
   if (!process.env.TEST_URL) {
-    server = spawn('python3', ['-m', 'http.server', '4174', '--bind', '127.0.0.1', '--directory', 'public']);
+    server = spawn('python3', ['-m', 'http.server', '4174', '--bind', '127.0.0.1', '--directory', 'dist']);
     await new Promise((resolve, reject) => {
       server.on('error', reject);
       let stopped = false;
@@ -75,6 +75,15 @@ test('mobile and desktop layouts fit the viewport', async () => {
 });
 
 after(async () => { await browser?.close(); server?.kill(); });
+
+test('unknown paths return a real not found response', async () => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const response = await page.goto(new URL('/not-a-page', url).href);
+  assert.equal(response.status(), 404);
+  assert.notEqual(await page.locator('h1').textContent(), 'Serene');
+  await context.close();
+});
 
 test('visitors can read the homepage and follow social links without JavaScript', async () => {
   const context = await browser.newContext({ javaScriptEnabled: false });

@@ -1,0 +1,18 @@
+---
+import Site from "./Site.astro";
+
+const { title } = Astro.props;
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const canonical = `https://www.serenematt.com${path}`;
+---
+<Site title={title} description={title}>
+  <link slot="head" rel="canonical" href={canonical}>
+  <style slot="head" is:inline>
+    .post { min-width: 0; max-width: 40rem; overflow-wrap: anywhere; }
+    .post p { line-height: 1.6; }
+  </style>
+  <main class="post">
+    <h1>{title}</h1>
+    <slot />
+  </main>
+</Site>

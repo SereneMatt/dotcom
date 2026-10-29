@@ -1,0 +1,24 @@
+---
+import Site from "../../layouts/Site.astro";
+import { publishedPosts } from "../../content/learnings.js";
+
+const posts = publishedPosts();
+---
+<Site title="Learnings" description="Short posts.">
+  <link slot="head" rel="canonical" href="https://www.serenematt.com/learnings">
+  <style slot="head" is:inline>
+    .learnings { min-width: 0; overflow-wrap: anywhere; }
+  </style>
+  <main class="learnings">
+    <h1>Learnings</h1>
+    {posts.length === 0 ? (
+      <p>No posts yet.</p>
+    ) : (
+      <ul>
+        {posts.map((post) => (
+          <li><a href={post.href}>{post.title}</a></li>
+        ))}
+      </ul>
+    )}
+  </main>
+</Site>

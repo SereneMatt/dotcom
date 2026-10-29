@@ -38,3 +38,14 @@ next build.
 
 Only Markdown files in `src/content/learnings` are published. Do not leave
 sample or test articles in that directory.
+
+## Check publishing
+
+Run `nub run test` with Chromium available through `CHROME_PATH`.
+The browser suite builds a temporary copy of the site for empty-state and
+sample-post checks. Your source articles remain unchanged, and test posts stay
+out of production output.
+Set `TEST_PORT` to use a local preview port other than 4174.
+
+With `TEST_URL`, the existing page checks use that preview URL. Publishing
+fixture checks are skipped because they require the temporary local build.
